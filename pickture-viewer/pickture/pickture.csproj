@@ -56,11 +56,13 @@
     </ApplicationDefinition>
     <Compile Include="AppZoomUtils.cs" />
     <Compile Include="BitmapUtils.cs" />
-    <Compile Include="PickFrame.xaml.cs">
-      <DependentUpon>PickFrame.xaml</DependentUpon>
+    <Compile Include="ImageRegion.xaml.cs">
+      <DependentUpon>ImageRegion.xaml</DependentUpon>
     </Compile>
+    <Compile Include="PicktureDocumentEx.cs" />
     <Compile Include="RegionData.cs" />
     <Compile Include="RegionManager.cs" />
+    <Compile Include="RegionFileStorage.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
     <Compile Include="WindowCommands.cs" />
     <Compile Include="WindowPlacement.cs" />
@@ -76,7 +78,7 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="PickFrame.xaml">
+    <Page Include="ImageRegion.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

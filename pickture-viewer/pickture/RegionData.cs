@@ -29,11 +29,11 @@ namespace pickture
         public int OriginHeight;
 
         [XmlArray]
-        public List<PickFrameItem> Frames = new List<PickFrameItem>();
+        public List<RegionRectData> Regions = new List<RegionRectData>();
     }
 
     [XmlType]
-    public class PickFrameItem
+    public class RegionRectData
     {
         [XmlAttribute]
         public int X;

@@ -17,11 +17,11 @@ using System.Windows.Shapes;
 namespace pickture
 {
     /// <summary>
-    /// Interaction logic for PickFrame.xaml
+    /// Interaction logic for ImageRegion.xaml
     /// </summary>
-    public partial class PickFrame : UserControl
+    public partial class ImageRegion : UserControl
     {
-        public PickFrame()
+        public ImageRegion()
         {
             InitializeComponent();
         }
@@ -44,11 +44,11 @@ namespace pickture
                 CopyToClipboardFile(this, new SaveImageArgs(ImageFormat.Png));
         }
 
-        public PickFrameItem FrameItem
+        public RegionRectData RegionRect
         {
             get
             {
-                var item = DataContext as PickFrameItem;
+                var item = DataContext as RegionRectData;
                 return item;
             }
         }

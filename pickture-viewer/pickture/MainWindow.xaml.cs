@@ -22,6 +22,7 @@ namespace pickture
             InitializeComponent();
 
             zoom_utils = new AppZoomUtils(picker_canvas, view_box, canvas_scale);
+            region_manager = new RegionManager(picker_canvas, () => bmp, () => ImageFilename);
 
             WindowCommands.Initialize(this);
 
@@ -35,18 +36,12 @@ namespace pickture
 
             var first_time_window = WindowPlacement.Load(this);
 
-            // Very quick and dirty - but it does the job
-            if (Properties.Settings.Default.Maximized)
-            {
-                WindowState = WindowState.Maximized;
-            }
-
             TryOpenImage(args[1], first_time_window);
         }
 
         private void TryOpenImage(string path, bool fit_to_screen)
         {
-            SaveFrames();
+            RegionFileStorage.SaveRegions(region_manager, picker_canvas, image_path, ImageFilename, img_w_px, img_h_px);
 
             try
             {
@@ -115,7 +110,7 @@ namespace pickture
             canvas_border.MaxWidth = img_w_px;
             canvas_border.MaxHeight = img_h_px;
 
-            LoadFrames();
+            RegionFileStorage.LoadRegions(region_manager, image_path);
         }
 
         private string ImageFilename
@@ -138,62 +133,12 @@ namespace pickture
 
             var pos = e.GetPosition(picker_canvas);
 
-            var new_frame = AddFrame();
+            var new_region = region_manager.AddRegion();
 
-            new_frame.Width = new_frame.Height = 250;
+            new_region.Width = new_region.Height = 250;
 
-            Canvas.SetLeft(new_frame, pos.X - new_frame.Width * 0.5);
-            Canvas.SetTop(new_frame, pos.Y - new_frame.Height * 0.5);
-        }
-
-        void frame_CopyToClipboardPixels(object sender, EventArgs e)
-        {
-            var frame = sender as PickFrame;
-
-            if (frame == null)
-                return;
-
-            var frame_item = GetFrameItem(frame);
-
-            var raw_bmp = BitmapUtils.ConvertToBmp(bmp);
-
-            var frame_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
-
-            var frame_source = BitmapUtils.ConvertToSource(frame_bmp);
-
-            Clipboard.SetImage(frame_source);
-
-            raw_bmp.Dispose();
-            frame_bmp.Dispose();
-        }
-
-        void frame_CopyToClipboardFile(object sender, SaveImageArgs e)
-        {
-            var frame = sender as PickFrame;
-
-            if (frame == null)
-                return;
-
-            var frame_item = GetFrameItem(frame);
-
-            var raw_bmp = BitmapUtils.ConvertToBmp(bmp);
-
-            var frame_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
-
-            var temp_dir = System.IO.Path.GetTempPath();
-            var extension = BitmapUtils.GetFileExtension(e.Format).ToLower();
-            var temp_filename = string.Format("{0}_{1}{2}", System.IO.Path.GetFileNameWithoutExtension(ImageFilename), frame_item.Id, extension);
-            var temp_image_path = System.IO.Path.Combine(temp_dir, temp_filename);
-
-            frame_bmp.Save(temp_image_path, e.Format);
-
-            System.Collections.Specialized.StringCollection files = new System.Collections.Specialized.StringCollection();
-            files.Add(temp_image_path);
-
-            Clipboard.SetFileDropList(files);
-
-            raw_bmp.Dispose();
-            frame_bmp.Dispose();
+            Canvas.SetLeft(new_region, pos.X - new_region.Width * 0.5);
+            Canvas.SetTop(new_region, pos.Y - new_region.Height * 0.5);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -239,186 +184,13 @@ namespace pickture
             }
         }
 
-        private PickFrameItem GetFrameItem(PickFrame frame)
-        {
-            var item = frame.FrameItem;
-
-            item.X = (int)Math.Round(Canvas.GetLeft(frame));
-            item.Y = (int)Math.Round(Canvas.GetTop(frame));
-
-            item.Width = (int)Math.Round(frame.ActualWidth);
-            item.Height = (int)Math.Round(frame.ActualHeight);
-
-            return item;
-        }
-
-        private IEnumerable<PickFrame> Frames
-        {
-            get
-            {
-                var frames = picker_canvas
-                                .Children
-                                .Cast<UIElement>()
-                                .Where(e => e is PickFrame)
-                                .Cast<PickFrame>();
-
-                return frames;
-            }
-        }
-
-        private PicktureDocument BuildDocument(string origin_filename)
-        {
-            var doc = new PicktureDocument(origin_filename, img_w_px, img_h_px);
-
-            foreach (var frame in Frames)
-            {
-                var item = GetFrameItem(frame);
-                doc.Frames.Add(item);
-            }
-
-            return doc;
-        }
-
-        private void LoadDocument(PicktureDocument doc)
-        {
-            foreach (var frame in doc.Frames)
-            {
-                var new_frame = AddFrame(frame);
-
-                new_frame.Width = frame.Width;
-                new_frame.Height = frame.Height;
-
-                Canvas.SetLeft(new_frame, frame.X);
-                Canvas.SetTop(new_frame, frame.Y);
-            }
-        }
-
-        private PickFrame AddFrame(PickFrameItem frame_item = null)
-        {
-            if (frame_item == null)
-            {
-                frame_item = new PickFrameItem();
-
-                var used_ids = Frames.Select(f => f.FrameItem.Id).OrderBy(id => id).ToArray();
-
-                for (var i = 0; i < used_ids.Length; i++)
-                {
-                    if (used_ids[i] != i)
-                    {
-                        // eat up free id's from the back
-                        var free_id = used_ids[i] - 1;
-                        frame_item.Id = free_id;
-                        break;
-                    }
-                }
-
-                // no free id was found, create a new one
-                if (frame_item.Id < 0)
-                    frame_item.Id = used_ids.Length;
-            }
-
-            var new_frame = new PickFrame();
-            new_frame.DataContext = frame_item;
-
-            new_frame.CopyToClipboardPixels -= frame_CopyToClipboardPixels;
-            new_frame.CopyToClipboardPixels += frame_CopyToClipboardPixels;
-
-            new_frame.CopyToClipboardFile -= frame_CopyToClipboardFile;
-            new_frame.CopyToClipboardFile += frame_CopyToClipboardFile;
-
-            picker_canvas.Children.Add(new_frame);
-
-            return new_frame;
-        }
-
-        private void RemoveFrame(PickFrame frame)
-        {
-            frame.CopyToClipboardPixels -= frame_CopyToClipboardPixels;
-            frame.CopyToClipboardFile -= frame_CopyToClipboardFile;
-
-            picker_canvas.Children.Remove(frame);
-        }
-
-        private void RemoveAllFrames()
-        {
-            foreach (var frame in Frames)
-            {
-                frame.CopyToClipboardPixels -= frame_CopyToClipboardPixels;
-                frame.CopyToClipboardFile -= frame_CopyToClipboardFile;
-            }
-
-            picker_canvas.Children.Clear();
-        }
-
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
         {
             base.OnClosing(e);
 
-            SaveFrames();
+            RegionFileStorage.SaveRegions(region_manager, picker_canvas, image_path, ImageFilename, img_w_px, img_h_px);
 
             WindowPlacement.Save(this);
-        }
-
-        private void SaveFrames()
-        {
-            if (string.IsNullOrEmpty(image_path))
-                return;
-
-            var xs = new XmlSerializer(typeof(PicktureDocument));
-            var pck_path = System.IO.Path.ChangeExtension(image_path, ".pck");
-
-            try
-            {
-                // don't save if no frames were placed
-                if (picker_canvas.Children.Count == 0)
-                {
-                    // just delete the pck file if there is one
-                    if (File.Exists(pck_path))
-                        File.Delete(pck_path);
-
-                    return;
-                }
-
-                var doc = BuildDocument(ImageFilename);
-
-                using (var fs = new FileStream(pck_path, FileMode.Create))
-                using (var gz = new GZipStream(fs, CompressionLevel.Optimal))
-                {
-                    xs.Serialize(gz, doc);
-                }
-            }
-            catch (Exception ex)
-            {
-                // TODO: where to log silent errors to ?!?!
-            }
-        }
-
-        private void LoadFrames()
-        {
-            if (string.IsNullOrEmpty(image_path))
-                return;
-
-            RemoveAllFrames();
-
-            var xs = new XmlSerializer(typeof(PicktureDocument));
-            var pck_path = System.IO.Path.ChangeExtension(image_path, ".pck");
-
-            if (!File.Exists(pck_path))
-                return;
-
-            try
-            {
-                using (var fs = new FileStream(pck_path, FileMode.Open))
-                using (var gz = new GZipStream(fs, CompressionMode.Decompress))
-                {
-                    var doc = xs.Deserialize(gz) as PicktureDocument;
-                    LoadDocument(doc);
-                }
-            }
-            catch (Exception ex)
-            {
-                // TODO: where to log silent errors to ?!?!
-            }
         }
 
         protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
@@ -442,5 +214,6 @@ namespace pickture
         }
 
         private AppZoomUtils zoom_utils;
+        private RegionManager region_manager;
     }
 }
