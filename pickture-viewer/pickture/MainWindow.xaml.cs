@@ -1,22 +1,13 @@
 ﻿using pickture.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Xml.Serialization;
 
 namespace pickture
@@ -32,7 +23,7 @@ namespace pickture
 
             zoom_utils = new AppZoomUtils(picker_canvas, view_box, canvas_scale);
 
-            InitWindowCommandBindings();
+            WindowCommands.Initialize(this);
 
             var args = Environment.GetCommandLineArgs();
 
@@ -42,7 +33,7 @@ namespace pickture
                 return;
             }
 
-            var first_time_window = LoadWindowPlacement();
+            var first_time_window = WindowPlacement.Load(this);
 
             // Very quick and dirty - but it does the job
             if (Properties.Settings.Default.Maximized)
@@ -52,88 +43,6 @@ namespace pickture
 
             TryOpenImage(args[1], first_time_window);
         }
-
-        #region Window Commands
-        private void InitWindowCommandBindings()
-        {
-            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, OnCloseWindow));
-            CommandBindings.Add(new CommandBinding(SystemCommands.MaximizeWindowCommand, OnMaximizeWindow, OnCanResizeWindow));
-            CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, OnMinimizeWindow, OnCanMinimizeWindow));
-            CommandBindings.Add(new CommandBinding(SystemCommands.RestoreWindowCommand, OnRestoreWindow, OnCanResizeWindow));
-        }
-
-        private void OnCanResizeWindow(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = ResizeMode == ResizeMode.CanResize || ResizeMode == ResizeMode.CanResizeWithGrip;
-        }
-
-        private void OnCanMinimizeWindow(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = ResizeMode != ResizeMode.NoResize;
-        }
-
-        private void OnCloseWindow(object target, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.CloseWindow(this);
-        }
-
-        private void OnMaximizeWindow(object target, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MaximizeWindow(this);
-        }
-
-        private void OnMinimizeWindow(object target, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.MinimizeWindow(this);
-        }
-
-        private void OnRestoreWindow(object target, ExecutedRoutedEventArgs e)
-        {
-            SystemCommands.RestoreWindow(this);
-        }
-        #endregion // Window Commands
-
-        #region Window Placement
-        private bool LoadWindowPlacement()
-        {
-            var first_time_window = Properties.Settings.Default.Left < 0 || Properties.Settings.Default.Top < 0 || Properties.Settings.Default.Width < 0 || Properties.Settings.Default.Height < 0;
-
-            Left = Properties.Settings.Default.Left;
-            Top = Properties.Settings.Default.Top;
-
-            Width = Properties.Settings.Default.Width;
-            Height = Properties.Settings.Default.Height;
-
-            return first_time_window;
-        }
-
-        private void SaveWindowPlacement()
-        {
-            if (WindowState == WindowState.Maximized)
-            {
-                // Use the RestoreBounds as the current values will be 0, 0 and the size of the screen
-                Properties.Settings.Default.Left = RestoreBounds.Left;
-                Properties.Settings.Default.Top = RestoreBounds.Top;
-
-                Properties.Settings.Default.Width = RestoreBounds.Width;
-                Properties.Settings.Default.Height = RestoreBounds.Height;
-
-                Properties.Settings.Default.Maximized = true;
-            }
-            else
-            {
-                Properties.Settings.Default.Left = Left;
-                Properties.Settings.Default.Top = Top;
-
-                Properties.Settings.Default.Width = Width;
-                Properties.Settings.Default.Height = Height;
-
-                Properties.Settings.Default.Maximized = false;
-            }
-
-            Properties.Settings.Default.Save();
-        }
-        #endregion // Window Placement
 
         private void TryOpenImage(string path, bool fit_to_screen)
         {
@@ -447,7 +356,7 @@ namespace pickture
 
             SaveFrames();
 
-            SaveWindowPlacement();
+            WindowPlacement.Save(this);
         }
 
         private void SaveFrames()
@@ -533,49 +442,5 @@ namespace pickture
         }
 
         private AppZoomUtils zoom_utils;
-    }
-
-    [XmlRoot]
-    public class PicktureDocument
-    {
-        public PicktureDocument() { }
-
-        public PicktureDocument(string origin_filename, int origin_width, int origin_height)
-        {
-            OriginFilename = origin_filename;
-            OriginWidth = origin_width;
-            OriginHeight = origin_height;
-        }
-
-        [XmlAttribute]
-        public string OriginFilename;
-
-        [XmlAttribute]
-        public int OriginWidth;
-
-        [XmlAttribute]
-        public int OriginHeight;
-
-        [XmlArray]
-        public List<PickFrameItem> Frames = new List<PickFrameItem>();
-    }
-
-    [XmlType]
-    public class PickFrameItem
-    {
-        [XmlAttribute]
-        public int X;
-
-        [XmlAttribute]
-        public int Y;
-
-        [XmlAttribute]
-        public int Width;
-
-        [XmlAttribute]
-        public int Height;
-
-        [XmlAttribute]
-        public int Id = -1;
     }
 }

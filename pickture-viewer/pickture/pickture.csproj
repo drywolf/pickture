@@ -59,8 +59,11 @@
     <Compile Include="PickFrame.xaml.cs">
       <DependentUpon>PickFrame.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RegionData.cs" />
     <Compile Include="RegionManager.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
+    <Compile Include="WindowCommands.cs" />
+    <Compile Include="WindowPlacement.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
