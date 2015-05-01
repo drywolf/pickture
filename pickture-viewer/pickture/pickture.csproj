@@ -54,9 +54,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AppZoomUtils.cs" />
+    <Compile Include="BitmapUtils.cs" />
     <Compile Include="PickFrame.xaml.cs">
       <DependentUpon>PickFrame.xaml</DependentUpon>
     </Compile>
+    <Compile Include="RegionManager.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>

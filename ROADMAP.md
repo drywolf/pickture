@@ -5,7 +5,7 @@
 #### Task Status ####
 - [x] ... done
 - [ ] ... to be done / not currently under development
-- [~] ... half-baked / needs more work
+- ... half-baked / needs more work
 
 ----------------------------------------------------
 
@@ -22,6 +22,9 @@
 - [ ] support XMP/RDF for in-image storage
 	- [ ] save regions to XMP
 	- [ ] load regions to XMP
+- [x] Ctrl-Mouseweel Zoom
+- [ ] Ctrl-Mouse Pan
+- [x] Save & Load Window Placement
 
 ----------------------------------------------------
 

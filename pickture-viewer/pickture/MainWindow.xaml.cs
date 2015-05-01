@@ -30,6 +30,10 @@ namespace pickture
         {
             InitializeComponent();
 
+            zoom_utils = new AppZoomUtils(picker_canvas, view_box, canvas_scale);
+
+            InitWindowCommandBindings();
+
             var args = Environment.GetCommandLineArgs();
 
             if (args.Length < 2)
@@ -38,10 +42,100 @@ namespace pickture
                 return;
             }
 
-            TryOpenImage(args[1]);
+            var first_time_window = LoadWindowPlacement();
+
+            // Very quick and dirty - but it does the job
+            if (Properties.Settings.Default.Maximized)
+            {
+                WindowState = WindowState.Maximized;
+            }
+
+            TryOpenImage(args[1], first_time_window);
         }
 
-        private void TryOpenImage(string path)
+        #region Window Commands
+        private void InitWindowCommandBindings()
+        {
+            CommandBindings.Add(new CommandBinding(SystemCommands.CloseWindowCommand, OnCloseWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.MaximizeWindowCommand, OnMaximizeWindow, OnCanResizeWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.MinimizeWindowCommand, OnMinimizeWindow, OnCanMinimizeWindow));
+            CommandBindings.Add(new CommandBinding(SystemCommands.RestoreWindowCommand, OnRestoreWindow, OnCanResizeWindow));
+        }
+
+        private void OnCanResizeWindow(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = ResizeMode == ResizeMode.CanResize || ResizeMode == ResizeMode.CanResizeWithGrip;
+        }
+
+        private void OnCanMinimizeWindow(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = ResizeMode != ResizeMode.NoResize;
+        }
+
+        private void OnCloseWindow(object target, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.CloseWindow(this);
+        }
+
+        private void OnMaximizeWindow(object target, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MaximizeWindow(this);
+        }
+
+        private void OnMinimizeWindow(object target, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.MinimizeWindow(this);
+        }
+
+        private void OnRestoreWindow(object target, ExecutedRoutedEventArgs e)
+        {
+            SystemCommands.RestoreWindow(this);
+        }
+        #endregion // Window Commands
+
+        #region Window Placement
+        private bool LoadWindowPlacement()
+        {
+            var first_time_window = Properties.Settings.Default.Left < 0 || Properties.Settings.Default.Top < 0 || Properties.Settings.Default.Width < 0 || Properties.Settings.Default.Height < 0;
+
+            Left = Properties.Settings.Default.Left;
+            Top = Properties.Settings.Default.Top;
+
+            Width = Properties.Settings.Default.Width;
+            Height = Properties.Settings.Default.Height;
+
+            return first_time_window;
+        }
+
+        private void SaveWindowPlacement()
+        {
+            if (WindowState == WindowState.Maximized)
+            {
+                // Use the RestoreBounds as the current values will be 0, 0 and the size of the screen
+                Properties.Settings.Default.Left = RestoreBounds.Left;
+                Properties.Settings.Default.Top = RestoreBounds.Top;
+
+                Properties.Settings.Default.Width = RestoreBounds.Width;
+                Properties.Settings.Default.Height = RestoreBounds.Height;
+
+                Properties.Settings.Default.Maximized = true;
+            }
+            else
+            {
+                Properties.Settings.Default.Left = Left;
+                Properties.Settings.Default.Top = Top;
+
+                Properties.Settings.Default.Width = Width;
+                Properties.Settings.Default.Height = Height;
+
+                Properties.Settings.Default.Maximized = false;
+            }
+
+            Properties.Settings.Default.Save();
+        }
+        #endregion // Window Placement
+
+        private void TryOpenImage(string path, bool fit_to_screen)
         {
             SaveFrames();
 
@@ -95,13 +189,22 @@ namespace pickture
 
             ScaleUtilities.FitInto(ref img_w, ref img_h, max_w, max_h);
 
-            Width = img_w;
-            Height = img_h;
+            if (fit_to_screen)
+            {
+                Width = img_w;
+                Height = img_h;
+            }
 
             picker_canvas.Width = img_w_px;
             picker_canvas.Height = img_h_px;
 
             Title = ImageFilename;
+
+            // reset scale
+            zoom_utils.ResetZoom();
+
+            canvas_border.MaxWidth = img_w_px;
+            canvas_border.MaxHeight = img_h_px;
 
             LoadFrames();
         }
@@ -143,11 +246,11 @@ namespace pickture
 
             var frame_item = GetFrameItem(frame);
 
-            var raw_bmp = ConvertToBmp(bmp);
+            var raw_bmp = BitmapUtils.ConvertToBmp(bmp);
 
-            var frame_bmp = Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
+            var frame_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
 
-            var frame_source = ConvertToSource(frame_bmp);
+            var frame_source = BitmapUtils.ConvertToSource(frame_bmp);
 
             Clipboard.SetImage(frame_source);
 
@@ -164,12 +267,12 @@ namespace pickture
 
             var frame_item = GetFrameItem(frame);
 
-            var raw_bmp = ConvertToBmp(bmp);
+            var raw_bmp = BitmapUtils.ConvertToBmp(bmp);
 
-            var frame_bmp = Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
+            var frame_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(frame_item.X, frame_item.Y, frame_item.Width, frame_item.Height));
 
             var temp_dir = System.IO.Path.GetTempPath();
-            var extension = GetFileExtension(e.Format).ToLower();
+            var extension = BitmapUtils.GetFileExtension(e.Format).ToLower();
             var temp_filename = string.Format("{0}_{1}{2}", System.IO.Path.GetFileNameWithoutExtension(ImageFilename), frame_item.Id, extension);
             var temp_image_path = System.IO.Path.Combine(temp_dir, temp_filename);
 
@@ -182,55 +285,6 @@ namespace pickture
 
             raw_bmp.Dispose();
             frame_bmp.Dispose();
-        }
-
-        static string GetFileExtension(ImageFormat format)
-        {
-            var encoders = ImageCodecInfo.GetImageEncoders().Where(x => x.FormatID == format.Guid).ToArray();
-            var exts = encoders.FirstOrDefault().FilenameExtension.Split(new[] { '*', ';' }, StringSplitOptions.RemoveEmptyEntries);
-            var ext = System.IO.Path.GetExtension(exts.First());
-            return ext;
-        }
-
-        private Bitmap ConvertToBmp(BitmapImage bitmapImage)
-        {
-            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
-
-            using (MemoryStream outStream = new MemoryStream())
-            {
-                BitmapEncoder enc = new BmpBitmapEncoder();
-                enc.Frames.Add(BitmapFrame.Create(bitmapImage));
-                enc.Save(outStream);
-                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
-
-                return new Bitmap(bitmap);
-            }
-        }
-
-        public static BitmapSource ConvertToSource(Bitmap source)
-        {
-            return System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(
-                          source.GetHbitmap(),
-                          IntPtr.Zero,
-                          Int32Rect.Empty,
-                          BitmapSizeOptions.FromEmptyOptions());
-        }
-
-
-        static public Bitmap Copy(Bitmap srcBitmap, System.Drawing.Rectangle section)
-        {
-            // Create the new bitmap and associated graphics object
-            Bitmap bmp = new Bitmap(section.Width, section.Height);
-            Graphics g = Graphics.FromImage(bmp);
-
-            // Draw the specified section of the source bitmap to the new one
-            g.DrawImage(srcBitmap, 0, 0, section, GraphicsUnit.Pixel);
-
-            // Clean up
-            g.Dispose();
-
-            // Return the bitmap
-            return bmp;
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -268,7 +322,7 @@ namespace pickture
                     next_index = 0;
 
                 var next_image_path = jpgs[next_index];
-                TryOpenImage(next_image_path);
+                TryOpenImage(next_image_path, false);
             }
             catch (Exception ex)
             {
@@ -392,6 +446,8 @@ namespace pickture
             base.OnClosing(e);
 
             SaveFrames();
+
+            SaveWindowPlacement();
         }
 
         private void SaveFrames()
@@ -456,11 +512,27 @@ namespace pickture
             }
         }
 
+        protected override void OnRenderSizeChanged(SizeChangedInfo sizeInfo)
+        {
+            base.OnRenderSizeChanged(sizeInfo);
+
+            zoom_utils.AdjustSize(img_w_px, img_h_px);
+        }
+
+        protected override void OnMouseWheel(MouseWheelEventArgs e)
+        {
+            base.OnMouseWheel(e);
+
+            zoom_utils.OnMouseWheel(e, img_w_px, img_h_px);
+        }
+
         private void ExitWithMessage(string message)
         {
             MessageBox.Show(message);
             Close();
         }
+
+        private AppZoomUtils zoom_utils;
     }
 
     [XmlRoot]
