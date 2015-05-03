@@ -24,7 +24,7 @@
         </Style>
     </UserControl.Style>
 
-    <Border BorderBrush="Red" BorderThickness="2">
+    <Border BorderBrush="Red" BorderThickness="2" SnapsToDevicePixels="True">
             
     </Border>
 </UserControl>

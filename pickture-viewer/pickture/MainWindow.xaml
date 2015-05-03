@@ -15,6 +15,10 @@
                     <Setter Property="Width" Value="40"/>
                     <Setter Property="Height" Value="40"/>
                 </Style>
+                <Style TargetType="ToggleButton" BasedOn="{StaticResource ToggleButtonStyle}">
+                    <Setter Property="Width" Value="40"/>
+                    <Setter Property="Height" Value="40"/>
+                </Style>
             </StackPanel.Resources>
 
             <Button Command="{Binding ToggleImage.PreviousImage}">
@@ -48,6 +52,9 @@
             <Button ToolTip="Copy PNG files">
                 <Image Source="Assets/Icons/appbar.page.png.png"></Image>
             </Button>
+
+            <ToggleButton local:ToggleButtonGroup.GroupName="someGroup">Select</ToggleButton>
+            <ToggleButton local:ToggleButtonGroup.GroupName="someGroup" IsChecked="True">Create</ToggleButton>
         </StackPanel>
 
         <Grid Grid.Row="1" ClipToBounds="True" Margin="0 10 0 10">
@@ -61,7 +68,7 @@
                 <Image Name="image_preview"></Image>
 
                 <Viewbox Name="view_box">
-                    <Canvas Name="picker_canvas" ClipToBounds="True">
+                    <Canvas Name="region_canvas" ClipToBounds="True" Background="Transparent">
                         <Rectangle Canvas.Left="15" Canvas.Top="15" Width="60" Height="50" Fill="Yellow"/>
                     </Canvas>
                 </Viewbox>

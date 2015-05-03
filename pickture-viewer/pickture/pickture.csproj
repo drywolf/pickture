@@ -34,6 +34,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="CsXmpToolkit">
+      <HintPath>dependencies\CsXmpToolkit\CsXmpToolkit.dll</HintPath>
+    </Reference>
     <Reference Include="GalaSoft.MvvmLight">
       <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
     </Reference>
@@ -69,17 +72,25 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AdornerDragStarter.cs" />
+    <Compile Include="Adorners\ResizeAdorner.cs" />
+    <Compile Include="Adorners\ResizeChrome.cs" />
+    <Compile Include="Adorners\RubberbandAdorner.cs" />
     <Compile Include="AppZoomUtils.cs" />
     <Compile Include="BitmapUtils.cs" />
     <Compile Include="CommandModel.cs" />
+    <Compile Include="CreateRegionOperation.cs" />
+    <Compile Include="EditorCanvasAspect.cs" />
     <Compile Include="ImageRegion.xaml.cs">
       <DependentUpon>ImageRegion.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageToggleController.cs" />
     <Compile Include="PicktureDocumentEx.cs" />
     <Compile Include="RegionData.cs" />
+    <Compile Include="RegionStorage\RegionFileStorageXmp.cs" />
     <Compile Include="RegionManager.cs" />
-    <Compile Include="RegionFileStorage.cs" />
+    <Compile Include="RegionStorage\RegionFileStorage.cs" />
+    <Compile Include="ToggleButtonGroup.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
     <Compile Include="WindowCommands.cs" />
     <Compile Include="WindowPlacement.cs" />
@@ -140,6 +151,11 @@
     <Resource Include="Assets\Icons\appbar.page.image.png" />
     <Resource Include="Assets\Icons\appbar.page.jpg.png" />
     <Resource Include="Assets\Icons\appbar.page.png.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="XmpToolkit.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -19,9 +19,9 @@
 - [x] Toggle next / previous image with left / right keys
 - [x] save regions to XML
 - [x] load regions from XML
-- [ ] support XMP/RDF for in-image storage
-	- [ ] save regions to XMP
-	- [ ] load regions to XMP
+- [x] support XMP/RDF for in-image storage
+	- [x] save regions to XMP
+	- [x] load regions to XMP
 - [x] Ctrl-Mouseweel Zoom
 - [ ] Ctrl-Mouse Pan
 - [x] Save & Load Window Placement

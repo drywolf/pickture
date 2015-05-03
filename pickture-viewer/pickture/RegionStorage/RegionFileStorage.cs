@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SE.Halligang.CsXmpToolkit.Schemas;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
@@ -8,16 +9,21 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Xml.Serialization;
 
-namespace pickture
+namespace pickture.RegionStorage
 {
-    public static class RegionFileStorage
+    public interface IRegionFileStorage
     {
-        public static void SaveRegions(RegionManager region_manager, Canvas picker_canvas, string image_path, string image_filename, int img_w_px, int img_h_px)
+        void SaveRegions(RegionManager region_manager, Canvas picker_canvas, string image_path, PicktureDocument document);
+        void LoadRegions(RegionManager region_manager, string image_path);
+    }
+
+    public class RegionFileStorage : IRegionFileStorage
+    {
+        public void SaveRegions(RegionManager region_manager, Canvas picker_canvas, string image_path, PicktureDocument document)
         {
             if (string.IsNullOrEmpty(image_path))
                 return;
 
-            var xs = new XmlSerializer(typeof(PicktureDocument));
             var pck_path = System.IO.Path.ChangeExtension(image_path, ".pck");
 
             try
@@ -32,12 +38,12 @@ namespace pickture
                     return;
                 }
 
-                var doc = PicktureDocumentEx.BuildDocument(region_manager, image_filename, img_w_px, img_h_px);
+                var xs = new XmlSerializer(typeof(PicktureDocument));
 
                 using (var fs = new FileStream(pck_path, FileMode.Create))
                 using (var gz = new GZipStream(fs, CompressionLevel.Optimal))
                 {
-                    xs.Serialize(gz, doc);
+                    xs.Serialize(gz, document);
                 }
             }
             catch (Exception ex)
@@ -46,7 +52,7 @@ namespace pickture
             }
         }
 
-        public static void LoadRegions(RegionManager region_manager, string image_path)
+        public void LoadRegions(RegionManager region_manager, string image_path)
         {
             if (string.IsNullOrEmpty(image_path))
                 return;

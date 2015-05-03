@@ -10,11 +10,13 @@
         <Color x:Key="HighlightColor">#FF3F3F41</Color>
         <Color x:Key="BlueColor">#FF007ACC</Color>
         <Color x:Key="ForegroundColor">#FFF4F4F5</Color>
+        <Color x:Key="CheckedColor">#FF363639</Color>        
 
         <SolidColorBrush x:Key="WindowBackgroundColorBrush" Color="{StaticResource WindowBackgroundColor}"/>
         <SolidColorBrush x:Key="HighlightColorBrush" Color="{StaticResource HighlightColor}"/>
         <SolidColorBrush x:Key="BlueColorBrush" Color="{StaticResource BlueColor}"/>
         <SolidColorBrush x:Key="ForegroundColorBrush" Color="{StaticResource ForegroundColor}"/>
+        <SolidColorBrush x:Key="CheckedColorBrush" Color="{StaticResource CheckedColor}"/>
 
         <Style x:Key="WindowButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Foreground" Value="{DynamicResource ForegroundColorBrush}" />
@@ -42,6 +44,42 @@
                             </Trigger>
                             <Trigger Property="IsEnabled" Value="false">
                                 <Setter TargetName="contentPresenter" Property="Opacity" Value=".5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="ToggleButtonStyle" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Foreground" Value="{DynamicResource ForegroundColorBrush}" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter x:Name="contentPresenter"
+                          HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                          VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                          SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                          Margin="{TemplateBinding Padding}"
+                          RecognizesAccessKey="True" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="{StaticResource HighlightColorBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" Value="{DynamicResource BlueColorBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="false">
+                                <Setter TargetName="contentPresenter" Property="Opacity" Value=".5" />
+                            </Trigger>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" Value="{StaticResource CheckedColorBrush}" />
                             </Trigger>
                         </ControlTemplate.Triggers>
                     </ControlTemplate>

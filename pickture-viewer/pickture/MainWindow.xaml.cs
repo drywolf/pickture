@@ -1,4 +1,5 @@
-﻿using pickture.Utilities;
+﻿using pickture.RegionStorage;
+using pickture.Utilities;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -21,8 +22,8 @@ namespace pickture
         {
             InitializeComponent();
 
-            zoom_utils = new AppZoomUtils(picker_canvas, view_box, canvas_scale);
-            region_manager = new RegionManager(picker_canvas, () => bmp, () => ImageFilename);
+            zoom_utils = new AppZoomUtils(region_canvas, view_box, canvas_scale);
+            region_manager = new RegionManager(region_canvas, () => bmp, () => ImageFilename);
 
             WindowCommands.Initialize(this);
 
@@ -36,17 +37,34 @@ namespace pickture
 
             var first_time_window = WindowPlacement.Load(this);
 
+            region_file_storage = new RegionFileStorageXmp();
+
             TryOpenImage(args[1], first_time_window);
 
             command_model = new CommandModel();
             command_model.ToggleImage = new ImageToggleController(() => image_path, path => TryOpenImage(path, false));
+            command_model.create_region.CreateRegion += create_region_CreateRegion;
 
             command_stack.DataContext = command_model;
+
+            editor_aspect = new EditorCanvasAspect(region_canvas, () => command_model.CurrentDragOperation);
+        }
+
+        void create_region_CreateRegion(object sender, CreateRegionArgs e)
+        {
+            var new_region = region_manager.AddRegion();
+
+            new_region.Rect.Width = (int)Math.Round(e.Rect.Width);
+            new_region.Rect.Height = (int)Math.Round(e.Rect.Height);
+
+            new_region.Rect.X = (int)Math.Round(e.Rect.X);
+            new_region.Rect.Y = (int)Math.Round(e.Rect.Y);
         }
 
         private void TryOpenImage(string path, bool fit_to_screen)
         {
-            RegionFileStorage.SaveRegions(region_manager, picker_canvas, image_path, ImageFilename, img_w_px, img_h_px);
+            var doc = PicktureDocumentEx.BuildDocument(region_manager, ImageFilename, img_w_px, img_h_px);
+            region_file_storage.SaveRegions(region_manager, region_canvas, image_path, doc);
 
             try
             {
@@ -70,9 +88,24 @@ namespace pickture
             try
             {
                 bmp = new BitmapImage();
-                bmp.BeginInit();
-                bmp.UriSource = new Uri(image_path);
-                bmp.EndInit();
+
+                // NOTE: the new way, reads the file to memory and releases the file handle afterwards
+                MemoryStream ms = new MemoryStream();
+                //using (MemoryStream ms = new MemoryStream())
+                {
+                    byte[] img_data = File.ReadAllBytes(image_path);
+                    ms.Write(img_data, 0, img_data.Length);
+                    ms.Position = 0;
+                    bmp.BeginInit();
+                    bmp.StreamSource = ms;
+                    bmp.EndInit();
+                }
+
+                // NOTE: the old way, locks the file for writing
+                //bmp = new BitmapImage();
+                //bmp.BeginInit();
+                //bmp.UriSource = new Uri(image_path);
+                //bmp.EndInit();
 
                 image_preview.Source = bmp;
             }
@@ -104,8 +137,8 @@ namespace pickture
                 Height = img_h;
             }
 
-            picker_canvas.Width = img_w_px;
-            picker_canvas.Height = img_h_px;
+            region_canvas.Width = img_w_px;
+            region_canvas.Height = img_h_px;
 
             Title = ImageFilename;
 
@@ -115,7 +148,7 @@ namespace pickture
             root_grid.MaxWidth = img_w_px;
             root_grid.MaxHeight = img_h_px;
 
-            RegionFileStorage.LoadRegions(region_manager, image_path);
+            region_file_storage.LoadRegions(region_manager, image_path);
         }
 
         private string ImageFilename
@@ -136,14 +169,14 @@ namespace pickture
         {
             base.OnPreviewMouseLeftButtonUp(e);
 
-            var pos = e.GetPosition(picker_canvas);
+            //var pos = e.GetPosition(region_canvas);
 
-            var new_region = region_manager.AddRegion();
+            //var new_region = region_manager.AddRegion();
 
-            new_region.Rect.Width = new_region.Rect.Height = 250;
+            //new_region.Rect.Width = new_region.Rect.Height = 250;
 
-            new_region.Rect.X = (int)Math.Round(pos.X - new_region.Rect.Width * 0.5);
-            new_region.Rect.Y = (int)Math.Round(pos.Y - new_region.Rect.Height * 0.5);
+            //new_region.Rect.X = (int)Math.Round(pos.X - new_region.Rect.Width * 0.5);
+            //new_region.Rect.Y = (int)Math.Round(pos.Y - new_region.Rect.Height * 0.5);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
@@ -195,7 +228,8 @@ namespace pickture
         {
             base.OnClosing(e);
 
-            RegionFileStorage.SaveRegions(region_manager, picker_canvas, image_path, ImageFilename, img_w_px, img_h_px);
+            var doc = PicktureDocumentEx.BuildDocument(region_manager, ImageFilename, img_w_px, img_h_px);
+            region_file_storage.SaveRegions(region_manager, region_canvas, image_path, doc);
 
             WindowPlacement.Save(this);
         }
@@ -223,5 +257,7 @@ namespace pickture
         private AppZoomUtils zoom_utils;
         private RegionManager region_manager;
         private CommandModel command_model;
+        private EditorCanvasAspect editor_aspect;
+        private IRegionFileStorage region_file_storage;
     }
 }

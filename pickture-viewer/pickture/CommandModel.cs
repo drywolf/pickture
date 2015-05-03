@@ -12,8 +12,16 @@ namespace pickture
     {
         public CommandModel()
         {
+            create_region = new CreateRegionOperation();
         }
 
         public ImageToggleController ToggleImage { get; set; }
+
+        public IAdornerDragOperation CurrentDragOperation
+        {
+            get { return create_region; }
+        }
+
+        public CreateRegionOperation create_region; 
     }
 }
