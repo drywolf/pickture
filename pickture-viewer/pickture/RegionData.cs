@@ -36,16 +36,16 @@ namespace pickture
     public class RegionRectData
     {
         [XmlAttribute]
-        public int X;
+        public int X { get; set; }
 
         [XmlAttribute]
-        public int Y;
+        public int Y { get; set; }
 
         [XmlAttribute]
-        public int Width;
+        public int Width { get; set; }
 
         [XmlAttribute]
-        public int Height;
+        public int Height { get; set; }
 
         [XmlAttribute]
         public int Id = -1;

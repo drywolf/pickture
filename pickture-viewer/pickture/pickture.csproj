@@ -34,9 +34,24 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="GalaSoft.MvvmLight">
+      <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\GalaSoft.MvvmLight.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Extras">
+      <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\GalaSoft.MvvmLight.Extras.dll</HintPath>
+    </Reference>
+    <Reference Include="GalaSoft.MvvmLight.Platform">
+      <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\GalaSoft.MvvmLight.Platform.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation">
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Interactivity, Version=4.5.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\MvvmLightLibs.5.1.1.0\lib\net45\System.Windows.Interactivity.dll</HintPath>
+    </Reference>
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -56,9 +71,11 @@
     </ApplicationDefinition>
     <Compile Include="AppZoomUtils.cs" />
     <Compile Include="BitmapUtils.cs" />
+    <Compile Include="CommandModel.cs" />
     <Compile Include="ImageRegion.xaml.cs">
       <DependentUpon>ImageRegion.xaml</DependentUpon>
     </Compile>
+    <Compile Include="ImageToggleController.cs" />
     <Compile Include="PicktureDocumentEx.cs" />
     <Compile Include="RegionData.cs" />
     <Compile Include="RegionManager.cs" />
@@ -101,6 +118,7 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -109,6 +127,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Icons\appbar.arrow.left.png" />
+    <Resource Include="Assets\Icons\appbar.arrow.right.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Icons\appbar.transform.rotate.clockwise.png" />
+    <Resource Include="Assets\Icons\appbar.transform.rotate.counterclockwise.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Assets\Icons\appbar.page.image.png" />
+    <Resource Include="Assets\Icons\appbar.page.jpg.png" />
+    <Resource Include="Assets\Icons\appbar.page.png.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

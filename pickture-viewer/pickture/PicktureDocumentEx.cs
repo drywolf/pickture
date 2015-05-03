@@ -24,15 +24,15 @@ namespace pickture
 
         public static void LoadDocument(RegionManager region_manager, PicktureDocument doc)
         {
-            foreach (var region_rect in doc.Regions)
+            foreach (var doc_rect in doc.Regions)
             {
-                var new_region = region_manager.AddRegion(region_rect);
+                var new_region = region_manager.AddRegion(doc_rect);
 
-                new_region.Width = region_rect.Width;
-                new_region.Height = region_rect.Height;
+                new_region.Rect.Width = doc_rect.Width;
+                new_region.Rect.Height = doc_rect.Height;
 
-                Canvas.SetLeft(new_region, region_rect.X);
-                Canvas.SetTop(new_region, region_rect.Y);
+                new_region.Rect.X = doc_rect.X;
+                new_region.Rect.Y = doc_rect.Y;
             }
         }
     }

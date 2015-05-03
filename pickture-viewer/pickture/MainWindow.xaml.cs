@@ -37,6 +37,11 @@ namespace pickture
             var first_time_window = WindowPlacement.Load(this);
 
             TryOpenImage(args[1], first_time_window);
+
+            command_model = new CommandModel();
+            command_model.ToggleImage = new ImageToggleController(() => image_path, path => TryOpenImage(path, false));
+
+            command_stack.DataContext = command_model;
         }
 
         private void TryOpenImage(string path, bool fit_to_screen)
@@ -107,8 +112,8 @@ namespace pickture
             // reset scale
             zoom_utils.ResetZoom();
 
-            canvas_border.MaxWidth = img_w_px;
-            canvas_border.MaxHeight = img_h_px;
+            root_grid.MaxWidth = img_w_px;
+            root_grid.MaxHeight = img_h_px;
 
             RegionFileStorage.LoadRegions(region_manager, image_path);
         }
@@ -135,53 +140,55 @@ namespace pickture
 
             var new_region = region_manager.AddRegion();
 
-            new_region.Width = new_region.Height = 250;
+            new_region.Rect.Width = new_region.Rect.Height = 250;
 
-            Canvas.SetLeft(new_region, pos.X - new_region.Width * 0.5);
-            Canvas.SetTop(new_region, pos.Y - new_region.Height * 0.5);
+            new_region.Rect.X = (int)Math.Round(pos.X - new_region.Rect.Width * 0.5);
+            new_region.Rect.Y = (int)Math.Round(pos.Y - new_region.Rect.Height * 0.5);
         }
 
         protected override void OnKeyUp(KeyEventArgs e)
         {
             base.OnKeyUp(e);
+            
+            if (e.Key == Key.Left)
+                command_model.ToggleImage.PreviousImage.Execute(null);
 
-            if (e.Key != Key.Left && e.Key != Key.Right)
-                // NOTE: nothing to do here
-                return;
+            else if (e.Key == Key.Right)
+                command_model.ToggleImage.NextImage.Execute(null);
 
-            try
-            {
-                var image_directory_path = System.IO.Path.GetDirectoryName(image_path);
+            //try
+            //{
+            //    var image_directory_path = System.IO.Path.GetDirectoryName(image_path);
 
-                var jpgs = Directory.GetFiles(image_directory_path, "*.jpg").ToList();
+            //    var jpgs = Directory.GetFiles(image_directory_path, "*.jpg").ToList();
 
-                if (jpgs.Count < 2)
-                    // NOTE: no other images to load
-                    return;
+            //    if (jpgs.Count < 2)
+            //        // NOTE: no other images to load
+            //        return;
 
-                var index = jpgs.IndexOf(image_path);
+            //    var index = jpgs.IndexOf(image_path);
 
-                var next_index = index;
+            //    var next_index = index;
 
-                if (e.Key == Key.Left)
-                    --next_index;
+            //    if (e.Key == Key.Left)
+            //        --next_index;
 
-                else if (e.Key == Key.Right)
-                    ++next_index;
+            //    else if (e.Key == Key.Right)
+            //        ++next_index;
 
-                if (next_index < 0)
-                    next_index = jpgs.Count - 1;
+            //    if (next_index < 0)
+            //        next_index = jpgs.Count - 1;
 
-                else if (next_index >= jpgs.Count)
-                    next_index = 0;
+            //    else if (next_index >= jpgs.Count)
+            //        next_index = 0;
 
-                var next_image_path = jpgs[next_index];
-                TryOpenImage(next_image_path, false);
-            }
-            catch (Exception ex)
-            {
-                // TODO: where to log silent errors to ?!?!
-            }
+            //    var next_image_path = jpgs[next_index];
+            //    TryOpenImage(next_image_path, false);
+            //}
+            //catch (Exception ex)
+            //{
+            //    // TODO: where to log silent errors to ?!?!
+            //}
         }
 
         protected override void OnClosing(System.ComponentModel.CancelEventArgs e)
@@ -215,5 +222,6 @@ namespace pickture
 
         private AppZoomUtils zoom_utils;
         private RegionManager region_manager;
+        private CommandModel command_model;
     }
 }

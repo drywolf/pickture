@@ -3,6 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:pickture"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="300" Background="Transparent">
     <UserControl.ContextMenu>
@@ -12,6 +13,16 @@
             <MenuItem Header="Copy PNG File" Click="CopyToClipboardPNG_Click"></MenuItem>
         </ContextMenu>
     </UserControl.ContextMenu>
+    
+    <UserControl.Style>
+        <Style TargetType="UserControl">
+            <Setter Property="Canvas.Left" Value="{Binding X}" />
+            <Setter Property="Canvas.Top" Value="{Binding Y}" />
+
+            <Setter Property="Width" Value="{Binding Width}" />
+            <Setter Property="Height" Value="{Binding Height}" />
+        </Style>
+    </UserControl.Style>
 
     <Border BorderBrush="Red" BorderThickness="2">
             

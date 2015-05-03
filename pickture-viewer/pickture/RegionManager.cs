@@ -25,7 +25,7 @@ namespace pickture
             {
                 region_item = new RegionRectData();
 
-                var used_ids = Regions.Select(f => f.RegionRect.Id).OrderBy(id => id).ToArray();
+                var used_ids = Regions.Select(f => f.Rect.Id).OrderBy(id => id).ToArray();
 
                 for (var i = 0; i < used_ids.Length; i++)
                 {
@@ -130,7 +130,7 @@ namespace pickture
 
         public static RegionRectData GetRegionRect(ImageRegion region)
         {
-            var item = region.RegionRect;
+            var item = region.Rect;
 
             item.X = (int)Math.Round(Canvas.GetLeft(region));
             item.Y = (int)Math.Round(Canvas.GetTop(region));

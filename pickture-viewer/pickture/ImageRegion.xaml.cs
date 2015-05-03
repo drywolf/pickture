@@ -44,7 +44,7 @@ namespace pickture
                 CopyToClipboardFile(this, new SaveImageArgs(ImageFormat.Png));
         }
 
-        public RegionRectData RegionRect
+        public RegionRectData Rect
         {
             get
             {
