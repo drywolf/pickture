@@ -12,7 +12,7 @@
 #### Backlog ####
 - Place region
 - [ ] Remove region
-- [ ] Move region
+- [x] Move region
 - [ ] Resize region
 - [ ] Distinguish between overlapping regions (for Resize, Remove, Move, Copy to Clipboard, ...)
 - [x] Copy region to Clipboard (Content, File)

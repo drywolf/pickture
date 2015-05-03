@@ -69,6 +69,12 @@
 
                 <Viewbox Name="view_box">
                     <Canvas Name="region_canvas" ClipToBounds="True" Background="Transparent">
+                        <Canvas.Resources>
+                            <Style TargetType="local:MoveThumb">
+                                <Setter Property="Canvas.Left" Value="{Binding X}"/>
+                                <Setter Property="Canvas.Top" Value="{Binding Y}"/>
+                            </Style>
+                        </Canvas.Resources>
                         <Rectangle Canvas.Left="15" Canvas.Top="15" Width="60" Height="50" Fill="Yellow"/>
                     </Canvas>
                 </Viewbox>

@@ -53,12 +53,13 @@ namespace pickture
         void create_region_CreateRegion(object sender, CreateRegionArgs e)
         {
             var new_region = region_manager.AddRegion();
+            var rect = new_region.DataContext as RegionRectData;
 
-            new_region.Rect.Width = (int)Math.Round(e.Rect.Width);
-            new_region.Rect.Height = (int)Math.Round(e.Rect.Height);
+            rect.Width = (int)Math.Round(e.Rect.Width);
+            rect.Height = (int)Math.Round(e.Rect.Height);
 
-            new_region.Rect.X = (int)Math.Round(e.Rect.X);
-            new_region.Rect.Y = (int)Math.Round(e.Rect.Y);
+            rect.X = (int)Math.Round(e.Rect.X);
+            rect.Y = (int)Math.Round(e.Rect.Y);
         }
 
         private void TryOpenImage(string path, bool fit_to_screen)

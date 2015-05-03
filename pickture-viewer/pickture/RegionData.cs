@@ -1,5 +1,7 @@
-﻿using System;
+﻿using pickture.Utilities.WPF;
+using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -33,13 +35,33 @@ namespace pickture
     }
 
     [XmlType]
-    public class RegionRectData
+    public class RegionRectData : IPositionable, INotifyPropertyChanged
     {
-        [XmlAttribute]
-        public int X { get; set; }
+        public event PropertyChangedEventHandler PropertyChanged;
 
         [XmlAttribute]
-        public int Y { get; set; }
+        public int X
+        {
+            get { return _x; }
+            set
+            {
+                _x = value;
+                PropertyChanged.Notify(() => X);
+            }
+        }
+        private int _x;
+
+        [XmlAttribute]
+        public int Y
+        {
+            get { return _y; }
+            set
+            {
+                _y = value;
+                PropertyChanged.Notify(() => Y);
+            }
+        }
+        private int _y;
 
         [XmlAttribute]
         public int Width { get; set; }

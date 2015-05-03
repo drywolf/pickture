@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pickture.Utilities.WPF;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -19,7 +20,7 @@ namespace pickture
             this.get_img_filename = get_img_filename;
         }
 
-        public ImageRegion AddRegion(RegionRectData region_item = null)
+        public FrameworkElement AddRegion(RegionRectData region_item = null)
         {
             if (region_item == null)
             {
@@ -43,18 +44,29 @@ namespace pickture
                     region_item.Id = used_ids.Length;
             }
 
-            var new_region = new ImageRegion();
-            new_region.DataContext = region_item;
+            MoveThumb mt = new MoveThumb();
+            var ct = new ControlTemplate();
+            ct.VisualTree = new FrameworkElementFactory(typeof(ImageRegion));
 
-            new_region.CopyToClipboardPixels -= region_CopyToClipboardPixels;
-            new_region.CopyToClipboardPixels += region_CopyToClipboardPixels;
+            mt.Template = ct;
+            mt.DataContext = region_item;
 
-            new_region.CopyToClipboardFile -= region_CopyToClipboardFile;
-            new_region.CopyToClipboardFile += region_CopyToClipboardFile;
+            mt.Loaded += (s, e) =>
+            {
+                var new_region = Find.VisualChild<ImageRegion>(s as DependencyObject);
 
-            picker_canvas.Children.Add(new_region);
+                new_region.DataContext = region_item;
 
-            return new_region;
+                new_region.CopyToClipboardPixels -= region_CopyToClipboardPixels;
+                new_region.CopyToClipboardPixels += region_CopyToClipboardPixels;
+
+                new_region.CopyToClipboardFile -= region_CopyToClipboardFile;
+                new_region.CopyToClipboardFile += region_CopyToClipboardFile;
+            };
+
+            picker_canvas.Children.Add(mt);
+
+            return mt;
         }
 
         public void RemoveRegion(ImageRegion region)
@@ -145,12 +157,7 @@ namespace pickture
         {
             get
             {
-                var regions = picker_canvas
-                                .Children
-                                .Cast<UIElement>()
-                                .Where(e => e is ImageRegion)
-                                .Cast<ImageRegion>();
-
+                var regions = Find.VisualChildren<ImageRegion>(picker_canvas);
                 return regions;
             }
         }

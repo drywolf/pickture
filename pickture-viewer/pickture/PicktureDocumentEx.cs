@@ -27,12 +27,13 @@ namespace pickture
             foreach (var doc_rect in doc.Regions)
             {
                 var new_region = region_manager.AddRegion(doc_rect);
+                var rect = new_region.DataContext as RegionRectData;
 
-                new_region.Rect.Width = doc_rect.Width;
-                new_region.Rect.Height = doc_rect.Height;
+                rect.Width = doc_rect.Width;
+                rect.Height = doc_rect.Height;
 
-                new_region.Rect.X = doc_rect.X;
-                new_region.Rect.Y = doc_rect.Y;
+                rect.X = doc_rect.X;
+                rect.Y = doc_rect.Y;
             }
         }
     }

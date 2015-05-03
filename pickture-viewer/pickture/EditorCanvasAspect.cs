@@ -16,6 +16,11 @@ namespace pickture
         bool IsSelected { get; set; }
     }
 
+    public interface IEditorHost
+    {
+        EditorCanvasAspect Editor { get; }
+    }
+
     public class EditorCanvasAspect
     {
         public EditorCanvasAspect(Canvas canvas, Func<IAdornerDragOperation> drag_operation)

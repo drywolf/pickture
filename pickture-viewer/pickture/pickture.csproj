@@ -81,10 +81,12 @@
     <Compile Include="CommandModel.cs" />
     <Compile Include="CreateRegionOperation.cs" />
     <Compile Include="EditorCanvasAspect.cs" />
+    <Compile Include="EditorItem.cs" />
     <Compile Include="ImageRegion.xaml.cs">
       <DependentUpon>ImageRegion.xaml</DependentUpon>
     </Compile>
     <Compile Include="ImageToggleController.cs" />
+    <Compile Include="MoveThumb.cs" />
     <Compile Include="PicktureDocumentEx.cs" />
     <Compile Include="RegionData.cs" />
     <Compile Include="RegionStorage\RegionFileStorageXmp.cs" />
@@ -92,6 +94,9 @@
     <Compile Include="RegionStorage\RegionFileStorage.cs" />
     <Compile Include="ToggleButtonGroup.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
+    <Compile Include="Utilities\WPF\Find.cs" />
+    <Compile Include="Utilities\WPF\INotifyPropertyChangedEx.cs" />
+    <Compile Include="Utilities\WPF\ItemsControlHelper.cs" />
     <Compile Include="WindowCommands.cs" />
     <Compile Include="WindowPlacement.cs" />
     <Page Include="MainWindow.xaml">
