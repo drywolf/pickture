@@ -46,7 +46,7 @@ namespace pickture.RegionStorage
                     {
                         imageMap.Areas.Add(new Area(
                             ShapeType.Rectangle,
-                            new int[] { region.X, region.Y, region.Width, region.Height },
+                            new int[] { (int)region.X, (int)region.Y, (int)region.Width, (int)region.Height },
                             new LangEntry[] { new LangEntry("x-default", "Martin") },
                             null,
                             region.Id.ToString()));

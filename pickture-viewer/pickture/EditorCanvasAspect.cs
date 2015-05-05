@@ -65,7 +65,7 @@ namespace pickture
             }
         }
 
-        public IEnumerable<UIElement> SelectedControls
+        public IEnumerable<FrameworkElement> SelectedControls
         {
             get
             {

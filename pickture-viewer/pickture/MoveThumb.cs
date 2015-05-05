@@ -10,8 +10,11 @@ namespace pickture
 {
     public interface IPositionable
     {
-        int X { get; set; }
-        int Y { get; set; }
+        double X { get; set; }
+        double Y { get; set; }
+
+        double Width { get; set; }
+        double Height { get; set; }
     }
 
     public class MoveThumb : Thumb, INotifyPropertyChanged

@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Xml.Serialization;
 
 namespace pickture
@@ -35,12 +36,24 @@ namespace pickture
     }
 
     [XmlType]
-    public class RegionRectData : IPositionable, INotifyPropertyChanged
+    public class RegionRectData : DependencyObject, IPositionable, INotifyPropertyChanged, IEditorItem
     {
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public bool IsSelected
+        {
+            get { return (bool)GetValue(IsSelectedProperty); }
+            set { SetValue(IsSelectedProperty, value); }
+        }
+
+        public static readonly DependencyProperty IsSelectedProperty =
+          DependencyProperty.Register("IsSelected", typeof(bool),
+                                      typeof(RegionRectData),
+                                      new FrameworkPropertyMetadata(false));
+
+
         [XmlAttribute]
-        public int X
+        public double X
         {
             get { return _x; }
             set
@@ -49,10 +62,10 @@ namespace pickture
                 PropertyChanged.Notify(() => X);
             }
         }
-        private int _x;
+        private double _x;
 
         [XmlAttribute]
-        public int Y
+        public double Y
         {
             get { return _y; }
             set
@@ -61,13 +74,31 @@ namespace pickture
                 PropertyChanged.Notify(() => Y);
             }
         }
-        private int _y;
+        private double _y;
 
         [XmlAttribute]
-        public int Width { get; set; }
+        public double Width
+        {
+            get { return _width; }
+            set
+            {
+                _width = value;
+                PropertyChanged.Notify(() => Width);
+            }
+        }
+        private double _width;
 
         [XmlAttribute]
-        public int Height { get; set; }
+        public double Height
+        {
+            get { return _height; }
+            set
+            {
+                _height = value;
+                PropertyChanged.Notify(() => Height);
+            }
+        }
+        private double _height;
 
         [XmlAttribute]
         public int Id = -1;

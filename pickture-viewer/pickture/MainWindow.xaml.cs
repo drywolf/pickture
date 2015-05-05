@@ -16,7 +16,7 @@ namespace pickture
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, IEditorHost
     {
         public MainWindow()
         {
@@ -253,6 +253,11 @@ namespace pickture
         {
             MessageBox.Show(message);
             Close();
+        }
+
+        public EditorCanvasAspect Editor
+        {
+            get { return editor_aspect; }
         }
 
         private AppZoomUtils zoom_utils;

@@ -92,6 +92,8 @@
     <Compile Include="RegionStorage\RegionFileStorageXmp.cs" />
     <Compile Include="RegionManager.cs" />
     <Compile Include="RegionStorage\RegionFileStorage.cs" />
+    <Compile Include="ResizeDecorator.cs" />
+    <Compile Include="ResizeThumb.cs" />
     <Compile Include="ToggleButtonGroup.cs" />
     <Compile Include="Utilities\ScaleUtilities.cs" />
     <Compile Include="Utilities\WPF\Find.cs" />
@@ -114,6 +116,10 @@
     <Page Include="ImageRegion.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ResizeChrome.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
   <ItemGroup>

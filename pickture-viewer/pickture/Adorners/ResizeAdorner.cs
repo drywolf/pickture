@@ -18,7 +18,7 @@ namespace pickture.Adorners
             }
         }
 
-        public ResizeAdorner(ContentControl designerItem)
+        public ResizeAdorner(UIElement designerItem)
             : base(designerItem)
         {
             this.chrome = new ResizeChrome();            

@@ -52,6 +52,8 @@ namespace pickture
 
                 //scale_transform.CenterX = 0.5 * canvas_border.ActualWidth;
                 //scale_transform.CenterY = 0.5 * canvas_border.ActualHeight;
+
+                picker_canvas.InvalidateVisual();
             }
         }
 

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using pickture.Utilities.WPF;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -13,6 +14,7 @@ namespace pickture
     {
         public static void ActivateItem(FrameworkElement element)
         {
+            element.PreviewMouseDown -= element_PreviewMouseDown;
             element.PreviewMouseDown += element_PreviewMouseDown;
         }
 
@@ -28,7 +30,7 @@ namespace pickture
             if (item == null)
                 return;
 
-            IEditorHost host = VisualTreeHelper.GetParent(fe) as IEditorHost;
+            var host = Find.Parent<IEditorHost>(fe);
 
             if (host != null)
             {

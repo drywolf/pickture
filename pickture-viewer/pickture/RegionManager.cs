@@ -7,6 +7,9 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Markup;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace pickture
@@ -44,17 +47,62 @@ namespace pickture
                     region_item.Id = used_ids.Length;
             }
 
+            // NOTE: deprecated
             MoveThumb mt = new MoveThumb();
-            var ct = new ControlTemplate();
-            ct.VisualTree = new FrameworkElementFactory(typeof(ImageRegion));
+            //var ct = new ControlTemplate();
+            //ct.VisualTree = new FrameworkElementFactory(typeof(ImageRegion));
+            //var tr = new Trigger()
+            //{
+            //    Property = RegionRectData.IsSelectedProperty,
+            //    Value = true
+            //};
 
-            mt.Template = ct;
+            ParserContext parserContext = new ParserContext();
+            parserContext.XmlnsDictionary.Add("", "http://schemas.microsoft.com/winfx/2006/xaml/presentation");
+            parserContext.XmlnsDictionary.Add("x", "http://schemas.microsoft.com/winfx/2006/xaml");
+            //parserContext.XmlnsDictionary.Add("s", "clr-namespace:pickture");
+            parserContext.XamlTypeMapper = new XamlTypeMapper(new string[] { });
+            parserContext.XamlTypeMapper.AddMappingProcessingInstruction("s_x", "pickture", "pickture");
+            parserContext.XmlnsDictionary.Add("s", "s_x");
+
+
+            string template =
+            @"
+            <ControlTemplate TargetType=""{x:Type Control}"">
+                <Grid Background=""Transparent"" DataContext=""{Binding RelativeSource={RelativeSource TemplatedParent}, Path=.}"">
+                    <!--<s:MoveThumb x:Name=""PART_MoveThumb"" Cursor=""SizeAll"" Background=""Transparent"">
+                        <s:MoveThumb.Template>
+                            <ControlTemplate TargetType=""{x:Type s:MoveThumb}"">
+                                <Rectangle Fill=""Transparent"" />
+                            </ControlTemplate>
+                        </s:MoveThumb.Template>
+                    </s:MoveThumb>-->
+                    <ContentPresenter x:Name=""PART_ContentPresenter""
+                                        Content=""{TemplateBinding ContentControl.Content}"" />
+                    <s:ResizeDecorator x:Name=""PART_DesignerItemDecorator"" ShowDecorator=""True"" />
+                </Grid>
+            </ControlTemplate>
+            ";
+
+            mt.Template = (ControlTemplate)XamlReader.Parse(template, parserContext);
+
+            var st = new Style(typeof(Control));
+            st.Setters.Add(new Setter { Property = Canvas.LeftProperty, Value = new Binding("X") });
+            st.Setters.Add(new Setter { Property = Canvas.TopProperty, Value = new Binding("Y") });
+            mt.Style = st;
+
+            //mt.Template = ct;
             mt.DataContext = region_item;
 
             mt.Loaded += (s, e) =>
             {
-                var new_region = Find.VisualChild<ImageRegion>(s as DependencyObject);
+                var sender = s as Control;
 
+                ContentPresenter content = sender.Template.FindName("PART_ContentPresenter", sender) as ContentPresenter;
+
+                var new_region = new ImageRegion();
+
+                content.Content = new_region;
                 new_region.DataContext = region_item;
 
                 new_region.CopyToClipboardPixels -= region_CopyToClipboardPixels;
@@ -62,6 +110,8 @@ namespace pickture
 
                 new_region.CopyToClipboardFile -= region_CopyToClipboardFile;
                 new_region.CopyToClipboardFile += region_CopyToClipboardFile;
+
+                EditorItemEx.ActivateItem(new_region);
             };
 
             picker_canvas.Children.Add(mt);
@@ -100,7 +150,7 @@ namespace pickture
 
             var raw_bmp = BitmapUtils.ConvertToBmp(get_bmp());
 
-            var region_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(region_item.X, region_item.Y, region_item.Width, region_item.Height));
+            var region_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle((int)region_item.X, (int)region_item.Y, (int)region_item.Width, (int)region_item.Height));
 
             var region_source = BitmapUtils.ConvertToSource(region_bmp);
 
@@ -121,7 +171,7 @@ namespace pickture
 
             var raw_bmp = BitmapUtils.ConvertToBmp(get_bmp());
 
-            var region_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle(region_item.X, region_item.Y, region_item.Width, region_item.Height));
+            var region_bmp = BitmapUtils.Copy(raw_bmp, new System.Drawing.Rectangle((int)region_item.X, (int)region_item.Y, (int)region_item.Width, (int)region_item.Height));
 
             var temp_dir = System.IO.Path.GetTempPath();
             var extension = BitmapUtils.GetFileExtension(e.Format).ToLower();

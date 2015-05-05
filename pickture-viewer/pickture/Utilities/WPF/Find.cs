@@ -8,7 +8,7 @@ namespace pickture.Utilities.WPF
     public static class Find
     {
         public static T Parent<T>(DependencyObject child)
-            where T : DependencyObject
+            where T : class
         {
             var parent = VisualTreeHelper.GetParent(child);
 
@@ -18,10 +18,10 @@ namespace pickture.Utilities.WPF
             }
             if (parent is T)
             {
-                return (T)parent;
+                return (T)(object)parent;
             }
 
-            return Parent<T>(parent);
+            return Parent<T>((DependencyObject)(object)parent);
         }
 
         public static T VisualChild<T>(DependencyObject depObj) where T : DependencyObject
